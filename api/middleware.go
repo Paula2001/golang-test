@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// requestLogger logs the method, path, status, and latency of every request.
-func requestLogger(c fiber.Ctx) error {
+// RequestLogger logs the method, path, status, and latency of every request.
+func RequestLogger(c fiber.Ctx) error {
 	start := time.Now()
 	err := c.Next()
 

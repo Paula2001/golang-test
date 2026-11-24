@@ -7,6 +7,10 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"interview/api"
+	"interview/bl"
+	"interview/dblayer"
 )
 
 // defaultDatabaseURL points at the local supermarket database (see seed.sh).
@@ -27,17 +31,12 @@ func main() {
 		log.Fatalf("database unreachable: %v", err)
 	}
 
-	defer db.Close()
+	// Wire the layers: dblayer -> bl -> api.
+	svc := bl.NewOrderService(dblayer.NewOrderAccess(db))
 
 	app := fiber.New()
+	app.Use(api.RequestLogger)
+	api.RegisterRoutes(app, svc)
 
-	app.Use(requestLogger)
-
-	app.Get("/health", func(c fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
-	})
-
-	app.Get("/orders", listOrders(db))
-
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen("0.0.0.0:3000"))
 }
